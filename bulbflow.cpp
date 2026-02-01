@@ -50,23 +50,19 @@ private:
     F_PRI_COL_END
 
     REVERSE_END
-    if (HotKey.find(ch) != HotKey.end()) {
-      switch (ch) {
-      case '\t':
-        printw(" ->|");
-        break;
-      case KEY_BTAB:
-        printw(" |<-");
-        break;
-      case 27:
-        printw(" ESC");
-        break;
-      default:
-        printw(" %c  ", ch);
-        break;
-      }
-    } else {
-      printw((ch == -1) ? "    " : " !  ");
+    switch (ch) {
+    case '\t':
+      printw(" ->|");
+      break;
+    case KEY_BTAB:
+      printw(" |<-");
+      break;
+    case 27:
+      printw(" ESC");
+      break;
+    default:
+      printw(" %c  ", ch);
+      break;
     }
 
     int currentX = getcurx(stdscr);
