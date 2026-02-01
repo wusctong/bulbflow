@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdlib>
 #include <ncurses.h>
 #include <string>
 #include <unordered_set>
@@ -6,6 +7,8 @@
 
 #define BOLD_BEGIN attron(A_BOLD);
 #define BOLD_END attroff(A_BOLD);
+#define REVERSE_BEGIN attron(A_REVERSE);
+#define REVERSE_END attroff(A_REVERSE);
 
 #define PRIMARY_COLOR COLOR_YELLOW
 #define SECONDARY_COLOR COLOR_GREEN
@@ -31,11 +34,14 @@ private:
   std::string eBuff;
   size_t cursorPos;
 
+  std::string username = "wusctong";
+  unsigned int userTabSize = 4;
+
   void drawStatusLine(int ch) {
     int statusY = maxY - 1;
 
     move(statusY, 0);
-    attron(A_REVERSE);
+    REVERSE_BEGIN
 
     F_PRI_COL_BEGIN
     BOLD_BEGIN
@@ -43,7 +49,7 @@ private:
     BOLD_END
     F_PRI_COL_END
 
-    attroff(A_REVERSE);
+    REVERSE_END
     if (HotKey.find(ch) != HotKey.end()) {
       switch (ch) {
       case '\t':
@@ -60,16 +66,16 @@ private:
         break;
       }
     } else {
-      printw((ch == -1) ? "    " : " ?  ");
+      printw((ch == -1) ? "    " : " !  ");
     }
 
     int currentX = getcurx(stdscr);
     for (int i = currentX + 4; i < maxX; i++) {
       addch(' ');
     }
-    attron(A_REVERSE);
+    REVERSE_BEGIN
 
-    attroff(A_REVERSE);
+    REVERSE_END
     refresh();
   }
 
@@ -119,6 +125,9 @@ private:
           cursorPos += 1;
         }
         break;
+      case '\t':
+        for (int i = 0; i < static_cast<int>(userTabSize); i++)
+          eBuff.insert(cursorPos, " ", 0, 1);
       default:
         eBuff.insert(cursorPos, std::string(1, static_cast<char>(ch)), 0, 1);
         cursorPos += 1;
@@ -128,11 +137,11 @@ private:
 
     move(0, 0);
     printw("%s", eBuff.substr(0, cursorPos).c_str());
-    attron(A_REVERSE);
+    REVERSE_BEGIN
     F_PRI_COL_BEGIN
     printw("%c", (cursorPos < eBuff.length()) ? eBuff[cursorPos] : ' ');
     F_PRI_COL_END
-    attroff(A_REVERSE);
+    REVERSE_END
     printw("%s", eBuff
                      .substr(std::min(cursorPos + 1, eBuff.length()),
                              std::max(static_cast<long>(eBuff.length() -
@@ -178,26 +187,22 @@ public:
   }
 
   void init() {
-    // Initialize ncurses
-    initscr();            // Start curses mode
-    cbreak();             // Disable line buffering
-    noecho();             // Don't echo input
-    keypad(stdscr, TRUE); // Enable function keys
-    curs_set(0);          // Hide cursor
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0);
     setlocale(LC_ALL, "");
     set_escdelay(42);
 
-    // Initialize color
     start_color();
     use_default_colors();
 
     init_pair(1, PRIMARY_COLOR, -1);
     init_pair(2, SECONDARY_COLOR, -1);
 
-    // Get terminal size
     getmaxyx(stdscr, maxY, maxX);
   }
-
   void run() {
     int ch, prev_ch = -1;
     while (running) {
@@ -241,9 +246,27 @@ public:
       clrtoeol();
     }
 
-    mvprintw(maxY / 2 - 1, 0, "Goodbye!");
-    mvprintw(maxY / 2 + 2, 0, "Press Any Key to Quit...");
-    getch();
+    REVERSE_BEGIN
+    BOLD_BEGIN
+    move(maxY / 2 + 1, 0);
+    F_PRI_COL_BEGIN
+    printw(" GOODBYE ");
+    F_PRI_COL_END
+    BOLD_END
+    REVERSE_END
+
+    mvprintw(maxY / 2 + 2, 0, "[Q] Quit / [Any] Cancel");
+
+    ch = getch();
+    switch (ch) {
+    case 'q':
+    case 'Q':
+      break;
+    default:
+      running = true;
+      run();
+      break;
+    }
   }
 
   void cleanup() { endwin(); }
