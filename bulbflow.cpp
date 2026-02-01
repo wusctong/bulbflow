@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <ncurses.h>
 #include <string>
 #include <unordered_set>
@@ -28,6 +29,7 @@ private:
   int maxY, maxX;
   bool running;
   std::string eBuff;
+  size_t cursorPos;
 
   void drawStatusLine(int ch) {
     int statusY = maxY - 1;
@@ -99,20 +101,44 @@ private:
   }
 
   void drawEditor(int ch) {
-    if (ch != -1) {
-      if (ch >= 32) {
-        eBuff += ch;
+    if (ch >= 0) {
+      switch (ch) {
+      case KEY_BACKSPACE:
+        if (cursorPos != 0) {
+          eBuff = eBuff.substr(0, cursorPos - 1) +
+                  eBuff.substr(cursorPos, eBuff.length() - cursorPos);
+          cursorPos -= 1;
+        }
+        break;
+      case KEY_LEFT:
+        if (cursorPos > 0)
+          cursorPos -= 1;
+        break;
+      case KEY_RIGHT:
+        if (cursorPos < eBuff.length()) {
+          cursorPos += 1;
+        }
+        break;
+      default:
+        eBuff.insert(cursorPos, std::string(1, static_cast<char>(ch)), 0, 1);
+        cursorPos += 1;
+        break;
       }
     }
 
-    mvprintw(0, 0, "editing => %s", modeNames[currentMode].c_str());
-
-    move(1, 0);
-    for (int i = 0; i < maxX; i++) {
-      printw("-");
-    }
-
-    mvprintw(2, 0, "%s", eBuff.c_str());
+    move(0, 0);
+    printw("%s", eBuff.substr(0, cursorPos).c_str());
+    attron(A_REVERSE);
+    F_PRI_COL_BEGIN
+    printw("%c", (cursorPos < eBuff.length()) ? eBuff[cursorPos] : ' ');
+    F_PRI_COL_END
+    attroff(A_REVERSE);
+    printw("%s", eBuff
+                     .substr(std::min(cursorPos + 1, eBuff.length()),
+                             std::max(static_cast<long>(eBuff.length() -
+                                                        cursorPos - 1),
+                                      0l))
+                     .c_str());
   }
 
   void drawProfile() {
@@ -145,7 +171,8 @@ private:
 
 public:
   BulbFlowApp()
-      : currentTab(BULBFLOW), currentMode(NORMAL), running(true), eBuff("") {
+      : currentTab(BULBFLOW), currentMode(NORMAL), running(true), eBuff(""),
+        cursorPos(0) {
     tabNames = {"BULBFLOW", "EDITOR", "PROFILE", "HELP"};
     modeNames = {"NOR", "EDT"};
   }
