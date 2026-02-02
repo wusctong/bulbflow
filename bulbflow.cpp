@@ -41,42 +41,48 @@ private:
     int statusY = maxY - 1;
 
     move(statusY, 0);
-    REVERSE_BEGIN
 
+    REVERSE_BEGIN
     F_PRI_COL_BEGIN
     BOLD_BEGIN
     printw(" %s ", tabNames[currentTab].c_str());
     BOLD_END
     F_PRI_COL_END
-
     REVERSE_END
+
+    move(statusY, maxX - 9);
+
     switch (ch) {
     case '\t':
-      printw(" ->|");
+      printw("->| ");
       break;
     case KEY_BTAB:
-      printw(" |<-");
+      printw("|<- ");
       break;
     case 27:
-      printw(" ESC");
+      printw("ESC ");
+      break;
+    case -1:
+      printw("    ");
       break;
     default:
-      printw(" %c  ", ch);
+      printw("  %c ", ch);
       break;
     }
 
-    int currentX = getcurx(stdscr);
-    for (int i = currentX + 4; i < maxX; i++) {
-      addch(' ');
-    }
     REVERSE_BEGIN
-
+    F_SEC_COL_BEGIN
+    BOLD_BEGIN
+    printw(" %s ", modeNames[currentMode].c_str());
+    BOLD_END
+    F_SEC_COL_END
     REVERSE_END
+
     refresh();
   }
 
   void drawContent(int ch) {
-    for (int i = 0; i < maxY - 1; i++) {
+    for (int i = 0; i < maxY; i++) {
       move(i, 0);
       clrtoeol();
     }
@@ -118,15 +124,22 @@ private:
         break;
       case KEY_RIGHT:
         if (cursorPos < eBuff.length()) {
-          cursorPos += 1;
+          cursorPos++;
         }
         break;
       case '\t':
-        for (int i = 0; i < static_cast<int>(userTabSize); i++)
+        for (int i = 0; i < static_cast<int>(userTabSize); i++) {
           eBuff.insert(cursorPos, " ", 0, 1);
+          userTabSize++;
+        }
+        break;
+      case KEY_UP:
+        break;
+      case KEY_DOWN:
+        break;
       default:
         eBuff.insert(cursorPos, std::string(1, static_cast<char>(ch)), 0, 1);
-        cursorPos += 1;
+        cursorPos++;
         break;
       }
     }
