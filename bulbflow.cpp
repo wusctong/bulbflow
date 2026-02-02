@@ -109,6 +109,7 @@ private:
   }
 
   void drawEditor(int ch) {
+
     if (ch >= 0) {
       switch (ch) {
       case KEY_BACKSPACE:
@@ -134,8 +135,16 @@ private:
         }
         break;
       case KEY_UP:
+        cursorPos = (cursorPos > maxX) ? cursorPos - maxX : cursorPos;
         break;
       case KEY_DOWN:
+        if (cursorPos + maxX <= eBuff.length()) {
+          cursorPos += maxX;
+        } else {
+          if (cursorPos / maxX < eBuff.length() / maxX) {
+            cursorPos = eBuff.length();
+          }
+        }
         break;
       default:
         eBuff.insert(cursorPos, std::string(1, static_cast<char>(ch)), 0, 1);
