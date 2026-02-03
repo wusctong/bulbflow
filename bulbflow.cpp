@@ -1,3 +1,6 @@
+// BulbFlow
+// wusctong
+
 #include "ncurses_macro.h"
 #include <algorithm>
 #include <cstdlib>
