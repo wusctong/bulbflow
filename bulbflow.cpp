@@ -1,21 +1,9 @@
+#include "ncurses_macro.h"
 #include <algorithm>
 #include <cstdlib>
-#include <ncurses.h>
 #include <string>
 #include <unordered_set>
 #include <vector>
-
-#define BOLD_BEGIN attron(A_BOLD);
-#define BOLD_END attroff(A_BOLD);
-#define REVERSE_BEGIN attron(A_REVERSE);
-#define REVERSE_END attroff(A_REVERSE);
-
-#define PRIMARY_COLOR COLOR_YELLOW
-#define SECONDARY_COLOR COLOR_GREEN
-#define F_PRI_COL_BEGIN attron(COLOR_PAIR(1));
-#define F_PRI_COL_END attroff(COLOR_PAIR(1));
-#define F_SEC_COL_BEGIN attron(COLOR_PAIR(2));
-#define F_SEC_COL_END attroff(COLOR_PAIR(2));
 
 #define VERSION "0.0.1"
 
