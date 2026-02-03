@@ -131,11 +131,12 @@ private:
       case '\t':
         for (int i = 0; i < static_cast<int>(userTabSize); i++) {
           eBuff.insert(cursorPos, " ", 0, 1);
-          userTabSize++;
+          cursorPos++;
         }
         break;
       case KEY_UP:
-        cursorPos = (cursorPos > maxX) ? cursorPos - maxX : cursorPos;
+        cursorPos =
+            (static_cast<int>(cursorPos) > maxX) ? cursorPos - maxX : cursorPos;
         break;
       case KEY_DOWN:
         if (cursorPos + maxX <= eBuff.length()) {
